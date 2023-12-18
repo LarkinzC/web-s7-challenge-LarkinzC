@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import * as yup from 'yup'
 
+const intitialFormValues = {
+  
+}
+
+
+const [ formValues, setFormValues ] = useState('')
 // 👇 Here are the validation errors you will use with Yup.
 const validationErrors = {
   fullNameTooShort: 'full name must be at least 3 characters',
@@ -8,7 +15,21 @@ const validationErrors = {
 }
 
 // 👇 Here you will create your schema.
-
+const formSchema = yup.object().shape({
+  fullName: yup
+    .string()
+    .max(20, validationErrors.fullNameTooLong)
+    .min(3, validationErrors.fullNameTooShort)
+    .required('Name is required'),
+  size: yup
+    .string()
+    .oneOf(['small','medium','large'],validationErrors.sizeIncorrect),
+  pepperoni: yup.boolean(),
+  greenPeppers: yup.boolean(),
+  pineApple: yup.boolean(),
+  mushrooms: yup.boolean(),
+  ham: yup.boolean(),
+})
 // 👇 This array could help you construct your checkboxes using .map in the JSX.
 const toppings = [
   { topping_id: '1', text: 'Pepperoni' },
@@ -17,6 +38,13 @@ const toppings = [
   { topping_id: '4', text: 'Mushrooms' },
   { topping_id: '5', text: 'Ham' },
 ]
+
+
+// useEffect(() => {
+//   formSchema.
+// }, [])
+
+
 
 export default function Form() {
   return (
@@ -38,21 +66,26 @@ export default function Form() {
           <label htmlFor="size">Size</label><br />
           <select id="size">
             <option value="">----Choose Size----</option>
-            {/* Fill out the missing options */}
+            <option value="small">S</option>
+            <option value="medium">M</option>
+            <option value="large">L</option>
           </select>
         </div>
         {true && <div className='error'>Bad value</div>}
       </div>
 
       <div className="input-group">
-        {/* 👇 Maybe you could generate the checkboxes dynamically */}
-        <label key="1">
-          <input
-            name="Pepperoni"
-            type="checkbox"
-          />
-          Pepperoni<br />
-        </label>
+        {toppings.map((topping) => {
+          return (
+            <label key={topping.topping_id}>
+              <input
+                name={topping.topping_id}
+                type='checkbox'
+                />
+                {topping.text}<br/>
+            </label>
+          )
+        })}
       </div>
       {/* 👇 Make sure the submit stays disabled until the form validates! */}
       <input type="submit" />
