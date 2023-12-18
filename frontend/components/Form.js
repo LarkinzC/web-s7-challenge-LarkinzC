@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import * as yup from 'yup'
 
+
 const intitialFormValues = {
-  
+  fullName: '',
+  size: '',
+  pepperoni: false,
+  greenPeppers: false, 
+  pineApple: false, 
+  mushrooms: false,
+  ham: false,
 }
 
 
-const [ formValues, setFormValues ] = useState('')
 // 👇 Here are the validation errors you will use with Yup.
 const validationErrors = {
   fullNameTooShort: 'full name must be at least 3 characters',
@@ -40,15 +46,41 @@ const toppings = [
 ]
 
 
-// useEffect(() => {
-//   formSchema.
-// }, [])
+
 
 
 
 export default function Form() {
+
+  const [ formErrors, setFormErrors] = useState({})
+  const [ formValues, setFormValues ] = useState(intitialFormValues)
+  const [ submitEnabled, setSubmitEnabled ] = useState(false)
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    const inputValue = type === 'checkbox' ? checked : value
+    setFormValues({...formValues, [name]:inputValue})
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const pizzaOrder = {
+      fullName: formValues.fullName.trim(),
+      size: formValues.size,
+      toppings: ['Pepperoni', 'Green Peppers', 'Pineapple', 'Mushrooms', 'Ham'].filter(topper => !!formValues[topper])
+    }
+    
+  }
+
+  useEffect(() => {
+    formSchema.isValid(formValues).then((isValid) => {
+      setSubmitEnabled(isValid)
+    })
+  }, [formValues])
+
   return (
-    <form>
+
+    <form onSubmit={handleSubmit}>
       <h2>Order Your Pizza</h2>
       {true && <div className='success'>Thank you for your order!</div>}
       {true && <div className='failure'>Something went wrong</div>}
@@ -56,7 +88,7 @@ export default function Form() {
       <div className="input-group">
         <div>
           <label htmlFor="fullName">Full Name</label><br />
-          <input placeholder="Type full name" id="fullName" type="text" />
+          <input placeholder="Type full name" id="fullName" type="text" onChange={handleChange} value={formValues.fullName}/>
         </div>
         {true && <div className='error'>Bad value</div>}
       </div>
@@ -66,9 +98,9 @@ export default function Form() {
           <label htmlFor="size">Size</label><br />
           <select id="size">
             <option value="">----Choose Size----</option>
-            <option value="small">S</option>
-            <option value="medium">M</option>
-            <option value="large">L</option>
+            <option value={formValues.size}>S</option>
+            <option value={formValues.size}>M</option>
+            <option value={formValues.size}>L</option>
           </select>
         </div>
         {true && <div className='error'>Bad value</div>}
@@ -79,8 +111,10 @@ export default function Form() {
           return (
             <label key={topping.topping_id}>
               <input
-                name={topping.topping_id}
+                name={topping.text}
                 type='checkbox'
+                value={topping.text}
+                onChange={handleChange}
                 />
                 {topping.text}<br/>
             </label>
@@ -88,7 +122,7 @@ export default function Form() {
         })}
       </div>
       {/* 👇 Make sure the submit stays disabled until the form validates! */}
-      <input type="submit" />
+      <input type="submit" disabled={!submitEnabled}/>
     </form>
   )
 }
